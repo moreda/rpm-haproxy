@@ -1,6 +1,4 @@
-$ModLoad imudp
-$UDPServerAddress 127.0.0.1
-$UDPServerRun 514
+$AddUnixListenSocket /var/lib/haproxy/dev/log
 $MaxMessageSize 64k
 $FileCreateMode 0600
 

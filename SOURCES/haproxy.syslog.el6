@@ -1,6 +1,4 @@
-$ModLoad imudp
-$UDPServerAddress 127.0.0.1
-$UDPServerRun 514
+$AddUnixListenSocket /var/lib/haproxy/dev/log
 
 $template HAProxy,"%TIMESTAMP% %syslogseverity-text:::UPPERCASE%: %msg%\n"
 $template HAProxyAccess,"%msg%\n"
