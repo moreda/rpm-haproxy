@@ -1,4 +1,3 @@
-$AddUnixListenSocket /var/lib/haproxy/dev/log
 $MaxMessageSize 64k
 $FileCreateMode 0600
 

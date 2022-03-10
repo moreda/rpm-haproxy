@@ -1,5 +1,3 @@
-$AddUnixListenSocket /var/lib/haproxy/dev/log
-
 $template HAProxy,"%TIMESTAMP% %syslogseverity-text:::UPPERCASE%: %msg:::drop-last-lf%\n"
 $template HAProxyAccess,"%msg%\n"
 
