@@ -44,14 +44,14 @@ ifeq ($(USE_LUA),1)
 endif
 
 build-docker:
-	docker build -t haproxy-rpm-builder7:${VERSION}-${RELEASE} -f Dockerfile7 .
-	docker build -t haproxy-rpm-builder8:${VERSION}-${RELEASE} -f Dockerfile8 .
+	docker build --platform linux/amd64 -t haproxy-rpm-builder7:${VERSION}-${RELEASE} -f Dockerfile7 .
+	docker build --platform linux/amd64 -t haproxy-rpm-builder8:${VERSION}-${RELEASE} -f Dockerfile8 .
 
 run-docker: build-docker
 	mkdir -p RPMS
 	chcon -Rt svirt_sandbox_file_t RPMS || true
-	docker run --volume $(HOME)/RPMS:/RPMS --rm haproxy-rpm-builder7:${VERSION}-${RELEASE}
-	docker run --volume $(HOME)/RPMS:/RPMS --rm haproxy-rpm-builder8:${VERSION}-${RELEASE}
+	docker run --platform linux/amd64 --volume $(HOME)/RPMS:/RPMS --rm haproxy-rpm-builder7:${VERSION}-${RELEASE}
+	docker run --platform linux/amd64 --volume $(HOME)/RPMS:/RPMS --rm haproxy-rpm-builder8:${VERSION}-${RELEASE}
 
 build: $(build_stages)
 	cp -r ./SPECS/* ./rpmbuild/SPECS/ || true
