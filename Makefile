@@ -42,17 +42,18 @@ install_prereq:
 		$(SUDO) $(PACKAGE_MANAGER) install $(INSTALL_FLAGS) $(PREREQ)
 
 clean:
-	rm -f ./SOURCES/haproxy-${VERSION}.tar.gz
+	rm -f ./SOURCES/haproxy-*.tar.gz
+	rm -rf ./SOURCES/lua-*
 	rm -rf ./rpmbuild
 	mkdir -p ./rpmbuild/SPECS/ ./rpmbuild/SOURCES/ ./rpmbuild/RPMS/ ./rpmbuild/SRPMS/
-	rm -rf ./lua-${LUA_VERSION}*
 
 download-upstream:
 	curl -o ./SOURCES/haproxy-${VERSION}.tar.gz http://www.haproxy.org/download/${MAINVERSION}/src/haproxy-${VERSION}.tar.gz
 
 build_lua:
 	rpm -q readline-devel || $(SUDO) yum install -y readline-devel
-	curl -O https://www.lua.org/ftp/lua-${LUA_VERSION}.tar.gz
+	curl -o ./SOURCES/lua-${LUA_VERSION}.tar.gz https://www.lua.org/ftp/lua-${LUA_VERSION}.tar.gz
+	cd ./SOURCES
 	tar xzf lua-${LUA_VERSION}.tar.gz
 	cd lua-${LUA_VERSION}
 	$(MAKE) -C lua-${LUA_VERSION} clean
