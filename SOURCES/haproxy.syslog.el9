@@ -1,3 +1,7 @@
+$ModLoad imudp
+$UDPServerAddress 127.0.0.1
+$UDPServerRun 514
+
 $template HAProxy,"%TIMESTAMP% %syslogseverity-text:::UPPERCASE%: %msg:::drop-last-lf%\n"
 $template HAProxyAccess,"%msg%\n"
 

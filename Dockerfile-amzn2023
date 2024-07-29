@@ -1,6 +1,6 @@
-FROM centos:7
+FROM amazonlinux:2023
 
-RUN yum install -y pcre-devel make gcc openssl-devel rpm-build systemd-devel curl sed zlib-devel sudo
+RUN dnf install --allowerasing -y pcre-devel make gcc openssl-devel rpm-build systemd-devel curl sed zlib-devel
 RUN mkdir RPMS
 RUN chmod -R 777 RPMS
 RUN mkdir SPECS
@@ -9,8 +9,4 @@ COPY Makefile Makefile
 COPY SPECS/haproxy.spec SPECS/haproxy.spec
 COPY SOURCES/* SOURCES/
 
-<<<<<<< HEAD
-CMD make NO_SUDO=1 USE_PROMETHEUS=1 USE_LUA=1 && cp /rpmbuild/RPMS/x86_64/* /RPMS && cp /rpmbuild/SRPMS/* /RPMS
-=======
 CMD make NO_SUDO=1 USE_PROMETHEUS=${USE_PROMETHEUS:-0} RELEASE=${RELEASE:-1} && cp /rpmbuild/RPMS/x86_64/* /RPMS && cp /rpmbuild/SRPMS/* /RPMS
->>>>>>> upstream/dev
