@@ -2,9 +2,9 @@ HOME=$(shell pwd)
 MAINVERSION?=2.9
 NO_SUDO?=0
 USE_PODMAN?=0
-LUA_VERSION?=5.4.3
-USE_LUA?=0
-USE_PROMETHEUS?=0
+LUA_VERSION?=5.4.7
+USE_LUA?=1
+USE_PROMETHEUS?=1
 CPU?=0
 VERSION=$(shell curl -s http://git.haproxy.org/git/haproxy-${MAINVERSION}.git/refs/tags/ | sed -n 's:.*>\(.*\)</a>.*:\1:p' | sed 's/^.//' | sort -rV | head -1)
 ifeq ("${VERSION}","./")
@@ -34,6 +34,8 @@ else
 	CONTAINER_RUNTIME=docker
 endif
 
+.ONESHELL:
+
 all: build
 
 install_prereq:
@@ -55,7 +57,6 @@ build_lua:
 	curl -o ./SOURCES/lua-${LUA_VERSION}.tar.gz https://www.lua.org/ftp/lua-${LUA_VERSION}.tar.gz
 	cd ./SOURCES
 	tar xzf lua-${LUA_VERSION}.tar.gz
-	cd lua-${LUA_VERSION}
 	$(MAKE) -C lua-${LUA_VERSION} clean
 	$(SUDO) $(MAKE) -C lua-${LUA_VERSION} MYCFLAGS=-fPIC linux test  # MYCFLAGS=-fPIC is required during linux ld
 	$(SUDO) $(MAKE) -C lua-${LUA_VERSION} install
@@ -66,20 +67,20 @@ ifeq ($(USE_LUA),1)
 endif
 
 build-docker:
-	$(CONTAINER_RUNTIME) build -t haproxy-rpm-builder7:${VERSION}-${RELEASE} -f Dockerfile7 .
-	$(CONTAINER_RUNTIME) build -t haproxy-rpm-builder8:${VERSION}-${RELEASE} -f Dockerfile8 .
-	$(CONTAINER_RUNTIME) build -t haproxy-rpm-builder9:${VERSION}-${RELEASE} -f Dockerfile9 .
-	$(CONTAINER_RUNTIME) build -t haproxy-rpm-builder-amzn2:${VERSION}-${RELEASE} -f Dockerfile-amzn2 .
-	$(CONTAINER_RUNTIME) build -t haproxy-rpm-builder-amzn2023:${VERSION}-${RELEASE} -f Dockerfile-amzn2023 .
+	$(CONTAINER_RUNTIME) build --platform linux/amd64 -t haproxy-rpm-builder7:${VERSION}-${RELEASE} -f Dockerfile7 .
+	$(CONTAINER_RUNTIME) build --platform linux/amd64 -t haproxy-rpm-builder8:${VERSION}-${RELEASE} -f Dockerfile8 .
+	$(CONTAINER_RUNTIME) build --platform linux/amd64 -t haproxy-rpm-builder9:${VERSION}-${RELEASE} -f Dockerfile9 .
+	$(CONTAINER_RUNTIME) build --platform linux/amd64 -t haproxy-rpm-builder-amzn2:${VERSION}-${RELEASE} -f Dockerfile-amzn2 .
+	$(CONTAINER_RUNTIME) build --platform linux/amd64 -t haproxy-rpm-builder-amzn2023:${VERSION}-${RELEASE} -f Dockerfile-amzn2023 .
 
 run-docker: build-docker
 	mkdir -p RPMS
 	chcon -Rt svirt_sandbox_file_t RPMS || true
-	$(CONTAINER_RUNTIME) run --volume $(HOME)/RPMS:/RPMS --rm -e USE_PROMETHEUS=${USE_PROMETHEUS} -e RELEASE=${RELEASE} haproxy-rpm-builder7:${VERSION}-${RELEASE}
-	$(CONTAINER_RUNTIME) run --volume $(HOME)/RPMS:/RPMS --rm -e USE_PROMETHEUS=${USE_PROMETHEUS} -e RELEASE=${RELEASE} haproxy-rpm-builder8:${VERSION}-${RELEASE}
-	$(CONTAINER_RUNTIME) run --volume $(HOME)/RPMS:/RPMS --rm -e USE_PROMETHEUS=${USE_PROMETHEUS} -e RELEASE=${RELEASE} haproxy-rpm-builder9:${VERSION}-${RELEASE}
-	$(CONTAINER_RUNTIME) run --volume $(HOME)/RPMS:/RPMS --rm -e USE_PROMETHEUS=${USE_PROMETHEUS} -e RELEASE=${RELEASE} haproxy-rpm-builder-amzn2:${VERSION}-${RELEASE}
-	$(CONTAINER_RUNTIME) run --volume $(HOME)/RPMS:/RPMS --rm -e USE_PROMETHEUS=${USE_PROMETHEUS} -e RELEASE=${RELEASE} haproxy-rpm-builder-amzn2023:${VERSION}-${RELEASE}
+	$(CONTAINER_RUNTIME) run --platform linux/amd64 --volume $(HOME)/RPMS:/RPMS --rm -e USE_PROMETHEUS=${USE_PROMETHEUS} -e RELEASE=${RELEASE} haproxy-rpm-builder7:${VERSION}-${RELEASE}
+	$(CONTAINER_RUNTIME) run --platform linux/amd64 --volume $(HOME)/RPMS:/RPMS --rm -e USE_PROMETHEUS=${USE_PROMETHEUS} -e RELEASE=${RELEASE} haproxy-rpm-builder8:${VERSION}-${RELEASE}
+	$(CONTAINER_RUNTIME) run --platform linux/amd64 --volume $(HOME)/RPMS:/RPMS --rm -e USE_PROMETHEUS=${USE_PROMETHEUS} -e RELEASE=${RELEASE} haproxy-rpm-builder9:${VERSION}-${RELEASE}
+	$(CONTAINER_RUNTIME) run --platform linux/amd64 --volume $(HOME)/RPMS:/RPMS --rm -e USE_PROMETHEUS=${USE_PROMETHEUS} -e RELEASE=${RELEASE} haproxy-rpm-builder-amzn2:${VERSION}-${RELEASE}
+	$(CONTAINER_RUNTIME) run --platform linux/amd64 --volume $(HOME)/RPMS:/RPMS --rm -e USE_PROMETHEUS=${USE_PROMETHEUS} -e RELEASE=${RELEASE} haproxy-rpm-builder-amzn2023:${VERSION}-${RELEASE}
 
 build: $(build_stages)
 	cp -r ./SPECS/* ./rpmbuild/SPECS/ || true
